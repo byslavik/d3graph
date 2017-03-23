@@ -1,20 +1,3 @@
-var data = [
-    {"name": "Ringo", "height": 75},
-    {"name": "Paulo", "height": 190},
-    {"name": "Paul", "height": 95},
-    {"name": "Sam", "height": 170},
-    {"name": "Samuel", "height": 70},
-    {"name": "Trolo", "height": 80},
-    {"name": "Bukat", "height": 140}
-];
-// fetch('http://www.nbrb.by/API/ExRates/Rates/Dynamics/190?startDate=2015-6-1&endDate=2016-6-1')
-// .then((response)=>{
-//     return response.json()
-// })
-// .then((data)=>{
-//     console.log(data);
-// });
-
 
 
 
@@ -89,10 +72,6 @@ class d3Chart {
         console.log(element.target.value);
         this.settings.request.endDate = element.target.value;
         this.rebuild();
-    }
-    addListeners() {            
-        // this.domainStart.addEventListener('keyup', this.convertData.bind(this));
-        // this.domainEnd.addEventListener('keyup', this.convertData.bind(this));
     }
     getData(url){
         let promise = new Promise((resolve, reject) => {
@@ -172,7 +151,6 @@ class d3Chart {
     convertData(){
         this.clearMessage();
         let scales = this.domainScale();
-        // this.clearCanvas();
         let setting = this.settings.canvas;
         let modifiedData = []; 
         let circleData = [];
