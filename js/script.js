@@ -92,7 +92,6 @@ class d3Chart {
                 result => {
                     this.data = result;
                     this.convertData();
-                    this.addListeners();
                 },
                 error => {
                     console.log(error); 
