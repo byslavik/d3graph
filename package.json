@@ -1,0 +1,27 @@
+{
+  "name": "d3graph",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/byslavik/d3graph.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/byslavik/d3graph/issues"
+  },
+  "homepage": "https://github.com/byslavik/d3graph#readme",
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^6.4.1",
+    "webpack": "^2.4.1",
+    "webpack-cli": "^1.0.0"
+  }
+}

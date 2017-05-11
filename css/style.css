@@ -4,3 +4,8 @@
 #alertBlock{
     color: red;
 }
+#infoCurrency,
+#infoDate {
+  font-size: 12px;
+  font-family: arial;
+}
