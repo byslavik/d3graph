@@ -1,15 +1,17 @@
 import Chart from './Chart';
 
-export default class Graph extends Chart {
+export default class Diagram extends Chart {
   constructor(settings) {
     super(settings);
 
     let that = this;
     this.period = 1000*60*60*24*366;
+    this.dateErrorMessage = "You can select dates only for one year";
+    
+    this.setStartDate('2015-05-01');
+    this.checkDates(settings.request.startDate, settings.request.endDate);
 
-    this.betweenDates = this.checkDates(settings.request.startDate, settings.request.endDate, this.period, "You can select dates only for one year");
-
-    if(this.betweenDates) {
+    if(this.isDateChecked) {
       this.getData(this.requestURL(this.settings.request));
 
       this.canvas.on("mousemove", function() {that.canvasHandler(d3.mouse(this)) } );
@@ -17,13 +19,15 @@ export default class Graph extends Chart {
   }
   draw(data) {
       console.log('draw...');
+
+      let group = this.canvas.append('g');
+
       let line = d3.line()
                       .x((d) => {return d.x})
                       .y((d) => {return d.y})
-
-      let group = this.canvas.append('g');
-      let transition = this.transition;
-      group.selectAll('path')
+    
+      
+      var path = group.selectAll('path')
               .data([data])
               .enter()
               .append('path')
@@ -77,7 +81,6 @@ export default class Graph extends Chart {
       })
       if(modifiedData.length != 0){
           this.modifiedData = modifiedData;
-          console.log(modifiedData);
           this.isDataLoaded = true;
           this.draw(modifiedData);
           this.addPointer();

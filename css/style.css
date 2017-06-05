@@ -9,3 +9,27 @@
   font-size: 12px;
   font-family: arial;
 }
+#infoPopup {
+        display: none;
+}
+#infoPopup rect {
+    x: -16;
+    y: -10;
+    width: 200px;
+    height: 67px;
+    fill: white;
+    stroke: red;
+    font-size: 15px;
+    rx: 24px;
+    z-index: 99999;
+}
+.infoPopupDate {
+    transform: translateY(10px);
+}
+.infoPopupMaxMin,
+.infoPopupRate {
+    transform: translateY(30px);
+}
+.infoPopupAmpl {
+    transform: translateY(50px);
+}

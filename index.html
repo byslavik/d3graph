@@ -19,13 +19,24 @@
 
         |
 
-        View type: <label>Diagram <input type="radio" name="type" value="diaig" checked="checked"></label> <label>Bar Chart <input type="radio" name="type" value="bar"></label> <label>Amplitude <input type="radio" name="type" value="ampl"></label>
+        View type:
+        
+        <select id="type">
+            <option value="">-----</option>
+            <option value="dia">Diagram</option>
+            <option value="bar">Bar Chart</option>
+            <option value="ampl">Amplitude</option>
+        </select>
 
     </p>
     <p id="alertBlock"></p>
+        
+    <p id="description">This application can provide you some charts to describe behavior of national currency.<br>
+                            If you want to see how currency has changed during the year, please select the <b>"Diagram"</b> option.<br>
+                            If you are intrested in stat of currency during one month - select <b>"Bar Chart"</b> option.<br>
+                            Select <b>"Amplitude"</b> option and then you will see amplitude of currency rates by month during one year.</p>
+    
     <script src="https://d3js.org/d3.v4.min.js"></script>
-    <!-- <script src="js/script.js"></script> -->
-    <script src="js/bundle.js"></script>
 
     </body>
 </html>

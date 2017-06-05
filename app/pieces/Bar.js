@@ -4,12 +4,10 @@ export default class Bar extends Chart {
   constructor(settings) {
     super(settings);
     this.period = 1000*60*60*24*31;
-
-    this.betweenDates = this.checkDates(settings.request.startDate, settings.request.endDate, this.period, "You can select dates only for one month");
-
-    if(this.betweenDates) {
-      this.getData(this.requestURL(this.settings.request));
-    }
+    this.dateErrorMessage = "You can select dates only for one month";
+    this.setStartDate('2016-04-01');
+    this.getData(this.requestURL(this.settings.request));
+    
   }
   convertData() {
     let modifiedData = [];
@@ -21,7 +19,9 @@ export default class Bar extends Chart {
       let date = new Date(item.Date);
         modifiedData.push({
             y: scales.y(item.Cur_OfficialRate),
-            x: scales.x(date)
+            x: scales.x(date),
+            date: item.Date.split('T')[0],
+            value: item.Cur_OfficialRate
         });
     })
 
@@ -40,24 +40,61 @@ export default class Bar extends Chart {
     let settings = this.settings.canvas;
 
     this.canvas.append('g').attr('style', 'transform: translateX(' + settings.axis + 'px)').call(d3.axisLeft(scales.y));
-    this.canvas.append('g').attr('style', 'transform: translate(' + settings.axis + 'px, ' + settings.height  + 'px)').call(d3.axisBottom(scales.x));
+    // this.canvas.append('g').attr('style', 'transform: translate(' + settings.axis + 'px, ' + settings.height  + 'px)').call(d3.axisBottom(scales.x));
   }
 
   draw(data) {
     let settings = this.settings.canvas;
+    let canvas = this.canvas;
     this.buildAxis();
+
     let barWidth = settings.width / data.length;
-    this.canvas
+    canvas
             .selectAll('rect')
             .data(data)
             .enter()
             .append('rect')
-            .attr('width', barWidth)
+            .attr('width', barWidth-1)
             .attr('fill', '#f90')
-            .attr('x', function(d,i){return (barWidth + 5)*i + settings.axis;})
+            .attr('x', function(d,i){return (barWidth)*i + settings.axis;})
             .attr('y', function(d){ return settings.height - d.y;} )
+            .on('mousemove', function(d, ev){
+              let x =  d3.mouse(this)[0]++ ;
+              let y = d3.mouse(this)[1]++;
+              let offsetX = x > settings.width / 2 ? x - 150 : x ;
+              let offsetY = y - 67 ;
+              let infoPopup = canvas.select('#infoPopup');
+                infoPopup.select('.infoPopupDate text').text('Date: ' + d.date);
+                infoPopup.select('.infoPopupRate text').text('Rate: ' + d.value + ' Bel. Rub.');
+
+                infoPopup
+                      .attr('style', 'display: block; transform: translateX('+ offsetX +'px) translateY('+ offsetY +'px)');  
+                    })
+            .on('mouseleave', function() {
+              canvas.select('#infoPopup').attr('style', 'display: none;');
+            })
             .transition()
             .duration(1000)
+            
             .attr('height', function(d){return d.y})
+      
+      this.drawInfoBox();
+  }
+
+  drawInfoBox() {
+      let group = this.canvas.append('g').attr('id', "infoPopup");
+
+      group.append('rect');
+
+      group.append('g')
+            .attr('class', 'infoPopupDate')
+            .append('text')
+            .text('Date: 01.2016');
+        
+      group.append('g')
+            .attr('class', 'infoPopupRate')
+            .append('text')
+            .text('max/min: 100/90');
+
   }
 }

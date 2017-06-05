@@ -1,15 +1,16 @@
 export default class Chart {
   constructor(settings) {
-
     let that = this;
     this.settings = settings;
     this.isDataLoaded = false;
+    this.isDateChecked = false;
+    this.dateErrorMessage = "Please check dates";
 
     this.alertBlock = document.getElementById('alertBlock');
     this.currIdBlcok = document.getElementById("currId");
     this.startDateBlock = document.getElementById("dateStart");
     this.endDateBlock = document.getElementById("dateEnd");
-
+    
     this.buildCanvas(settings.canvas);
 
     this.currIdBlcok.addEventListener('change', this.setCurrId.bind(this));
@@ -19,8 +20,9 @@ export default class Chart {
   rebuild(){
       let settings = this.settings;
       console.log('rebuild');
-      this.clearCanvas();
-      this.getData(this.requestURL(settings.request));
+    this.clearCanvas();
+    this.getData(this.requestURL(settings.request));
+      
 
   }
   domainScale(maxmin, data){
@@ -33,7 +35,7 @@ export default class Chart {
           maxdate = new Date(settingsRequest.endDate);
 
       let scales = {
-              y: d3.scaleLinear().domain([maxmin[0], maxmin[1]]).range([settings.height, 0]),
+              y: d3.scaleLinear().domain(maxmin).range([settings.height, 0]),
               x: d3.scaleTime().domain([mindate, maxdate]).range([0, settings.width]),
               oX: d3.scaleLinear().domain([0, settings.width]).range([0, dataLength])
           }
@@ -47,7 +49,13 @@ export default class Chart {
       this.rebuild();
   }
   setStartDate(element){
-      this.settings.request.startDate = element.target.value;
+      if(typeof element == 'object') {
+        this.settings.request.startDate = element.target.value;
+      } else {
+          this.startDateBlock.value = element;
+          this.settings.request.startDate = element;
+      }
+      console.log(element);
       this.rebuild();
   }
   setEndDate(element){
@@ -74,35 +82,43 @@ export default class Chart {
       return [minElement, maxElement];
   }
   requestURL(settings){
-      return 'http://www.nbrb.by/API/ExRates/Rates/Dynamics/' + settings.currId + '?startDate=' + settings.startDate + '&endDate=' + settings.endDate
+      return ['http://www.nbrb.by/API/ExRates/Rates/Dynamics/' + settings.currId + '?startDate=' + settings.startDate + '&endDate=' + settings.endDate , settings]
   }
-  getData(url){
-      let promise = new Promise((resolve, reject) => {
-          console.log('loading data...');
-          fetch(url)
-              .then((response)=>{
-                  return response.json()
-              })
-              .then((data)=>{
-                  resolve(data);
-              })
-              .catch((err)=>{
-                  reject(err)
-              });
-      });
+  getData([url, settings]){
+      this.checkDates(settings.startDate, settings.endDate);
+      if(this.isDateChecked){
 
-      promise
-          .then(
-              result => {
-                  console.log('data loaded');
-                  this.data = result;
-                  this.isDataLoaded = true;
-                  this.convertData();
-              },
-              error => {
-                  console.log(error);
-              }
+          let promise = new Promise((resolve, reject) => {
+                console.log('loading data...');
+                this.showMessage('loading data...');
+                fetch(url)
+                    .then((response)=>{
+                        return response.json()
+                    })
+                    .then((data)=>{
+                        resolve(data);
+                    })
+                    .catch((err)=>{
+                        reject(err)
+                    });
+            });
+
+            promise
+                .then(
+                    result => {
+                        console.log('data loaded');
+                        this.data = result;
+                        this.isDataLoaded = true;
+                        this.clearMessage();
+                        this.clearCanvas();
+                        this.convertData();
+                    },
+                    error => {
+                        console.log(error);
+                    }
           );
+      }
+      
   }
 
   showMessage(text) {
@@ -113,17 +129,20 @@ export default class Chart {
       this.alertBlock.innerHTML = '';
   }
 
-  checkDates(dateFrom, dateTo, dimension, message) { //to do : dimension
+  checkDates(dateFrom, dateTo) { //to do : dimension
       dateFrom = Date.parse(dateFrom);
       dateTo = Date.parse(dateTo);
 
       let between = dateTo - dateFrom;
-      if(between > dimension || between < 0){
-        this.showMessage(message);
-        return false;
-      }
 
-      return true;
+      if(between > this.period || between < 0){
+        this.showMessage(this.dateErrorMessage);
+        this.isDateChecked = false;
+
+        return;
+      }
+      this.clearMessage()
+      this.isDateChecked = true;
   }
 
   clearCanvas() {
@@ -132,13 +151,17 @@ export default class Chart {
   }
 
   buildCanvas(settings){
-      this.canvas = d3.select('body')
+      if(!document.getElementById('myCanvas')) {
+          this.canvas = d3.select('body')
                       .append('svg')
                       .attr('width', settings.width + settings.axis + 150)
                       .attr('height', settings.height + settings.axis)
                       .attr('id', 'myCanvas');
-
+      } else {
+          this.canvas = d3.select('#myCanvas'); 
+      }
 
   }
+
 
 }

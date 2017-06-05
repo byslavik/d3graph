@@ -1,4 +1,4 @@
-import Graph from './pieces/Graph';
+import Diagram from './pieces/Diagram';
 import Bar from './pieces/Bar';
 import Amplitude from './pieces/Amplitude';
 
@@ -17,7 +17,20 @@ const SETTINGS = {
 };
 
 
-// let graphChart = new Graph(SETTINGS);
-// let barChart = new Bar(SETTINGS);
-let amplitudeChart = new Amplitude(SETTINGS);
-//
+let typeSelector = document.getElementById('type');
+
+function changeView(ev) {
+    switch (ev.target.value) {
+        case 'bar':
+            let bar = new Bar(SETTINGS);
+            break;
+        case 'ampl':
+            let ampl = new Amplitude(SETTINGS);
+            break;
+        case 'dia':
+            let dia = new Diagram(SETTINGS);
+            break;
+    }
+}
+
+typeSelector.addEventListener('change', changeView)
