@@ -73,7 +73,8 @@ export default class Diagram extends Chart {
         let itemRate = item.Cur_OfficialRate;
         let itemDen = item.denominatedRate;
         let rate = this.isDenominated ? itemDen : itemRate;
-        console.log(rate);
+        
+        
           modifiedData.push({
               y: scales.y(rate),
               x: scales.x(date),

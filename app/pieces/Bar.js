@@ -30,12 +30,19 @@ export default class Bar extends Chart {
           });
     })
 
-    if(modifiedData.length != 0){
+    if(modifiedData.length <= 367){
         this.modifiedData = modifiedData;
 
         this.isDataLoaded = true;
-        this.draw(modifiedData);
-    } else {
+        this.draw(this.modifiedData);
+    } else if(modifiedData.length >= 367) {
+        this.modifiedData = modifiedData.slice(0, 366);
+
+        this.isDataLoaded = true;
+        this.draw(this.modifiedData);
+
+        this.showMessage('You have selected too long time slot. Data only for first year from your selection is shown ');
+    } else if(modifiedData.length == 0) {
         this.showMessage('Something wrong with server data.');
     }
 

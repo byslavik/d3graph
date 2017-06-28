@@ -37,7 +37,7 @@ export default class Chart {
       let settings = this.settings.canvas;
       let settingsRequest = this.settings.request;
 
-      let mindate = new Date(settingsRequest.startDate);
+      let mindate = new Date(data[0].Date);
 
       if(data[dataLength-1]) {
           let maxdate = new Date(data[dataLength-1].Date);
@@ -201,11 +201,11 @@ export default class Chart {
 
       if(between > this.period || between < 0){
         this.showMessage(this.dateErrorMessage);
-        this.isDateChecked = false;
-        return;
+        
+        return false;
       }
       this.clearMessage()
-      this.isDateChecked = true;
+      return true;
   }
   clearCanvas() {
       console.log('cleaning...');
