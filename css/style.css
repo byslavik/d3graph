@@ -1,5 +1,13 @@
-#myCanvas{
-    /*border: 3px solid black;*/
+body {
+    background: #ccc;
+}
+.wrapper {
+    width: 900px;
+    margin: 0 auto;
+    font-family: 'Roboto Condensed', sans-serif;
+    padding: 20px;
+    background: #fff;
+    border: 5px solid #999;   
 }
 #alertBlock{
     color: red;
@@ -20,7 +28,7 @@
     fill: white;
     stroke: red;
     font-size: 15px;
-    rx: 24px;
+    rx: 0px;
     z-index: 99999;
 }
 .infoPopupDate {

@@ -4,18 +4,21 @@ export default class Chart {
     this.settings = settings;
     this.isDataLoaded = false;
     this.isDateChecked = false;
+    this.isDenominated = false;
+    this.dateOfDenomination = new Date('2016-06-30');
     this.dateErrorMessage = "Please check dates";
-
+    this.dateUpdateMessage = "Dates were updated"
+    this.data = [];
     this.alertBlock = document.getElementById('alertBlock');
     this.currIdBlcok = document.getElementById("currId");
     this.startDateBlock = document.getElementById("dateStart");
     this.endDateBlock = document.getElementById("dateEnd");
+    this.updateDatesButton = document.getElementById("updateDates");
     
     this.buildCanvas(settings.canvas);
-
+    
     this.currIdBlcok.addEventListener('change', this.setCurrId.bind(this));
-    this.startDateBlock.addEventListener('change', this.setStartDate.bind(this));
-    this.endDateBlock.addEventListener('change', this.setEndDate.bind(this));
+    this.updateDatesButton.addEventListener('click', this.updatesDates.bind(this, this.startDateBlock, this.endDateBlock));
   }
   rebuild(){
       let settings = this.settings;
@@ -25,42 +28,103 @@ export default class Chart {
       
 
   }
+  isInteger(num){
+      return (num ^ 0) === num; 
+  }
   domainScale(maxmin, data){
       let dataLength = data.length;
 
       let settings = this.settings.canvas;
       let settingsRequest = this.settings.request;
 
-      let mindate = new Date(settingsRequest.startDate),
-          maxdate = new Date(settingsRequest.endDate);
+      let mindate = new Date(settingsRequest.startDate);
 
-      let scales = {
+      if(data[dataLength-1]) {
+          let maxdate = new Date(data[dataLength-1].Date);
+          let scales = {
               y: d3.scaleLinear().domain(maxmin).range([settings.height, 0]),
               x: d3.scaleTime().domain([mindate, maxdate]).range([0, settings.width]),
               oX: d3.scaleLinear().domain([0, settings.width]).range([0, dataLength])
           }
-
-
-
+          
           this.scales = scales;
+      } else {
+        this.showMessage('Something wrong with server data.');
+
+        return false;
+      }
+
+
+          
   }
   setCurrId(element) {
       this.settings.request.currId = element.target.value;
       this.rebuild();
   }
+  setDenominated(value) {
+      this.isDenominated = value;
+  }
+  formatDashDate(date) {
+
+    var dd = date.getDate();
+    if (dd < 10) dd = '0' + dd;
+
+    var mm = date.getMonth() + 1;
+    if (mm < 10) mm = '0' + mm;
+
+    var yyyy = date.getFullYear();
+
+    return yyyy + '-' + mm + '-' + dd;
+}
+
+  formatDotDate(date) {
+      var dd = date.getDate();
+      if (dd < 10) dd = '0' + dd;
+
+      var mm = date.getMonth() + 1;
+      if (mm < 10) mm = '0' + mm;
+
+      var yyyy = date.getFullYear()
+
+      return dd + '.' + mm + '.' + yyyy;
+  }
+  updatesDates(from, to){
+      this.setStartDate(from);
+      this.setEndDate(to);
+
+      this.setDenominated(false);
+
+      let dateFrom = new Date(this.settings.request.startDate);
+      let dateTo = new Date(this.settings.request.endDate);
+
+      if(this.dateOfDenomination <= dateTo && this.dateOfDenomination >= dateFrom) {
+          this.setDenominated(true);
+      }
+
+      this.rebuild();
+  }
   setStartDate(element){
       if(typeof element == 'object') {
-        this.settings.request.startDate = element.target.value;
+        let newDate = element.value
+        this.settings.request.startDate = newDate;
+
       } else {
           this.startDateBlock.value = element;
           this.settings.request.startDate = element;
       }
-      console.log(element);
-      this.rebuild();
+      
   }
   setEndDate(element){
-      this.settings.request.endDate = element.target.value;
-      this.rebuild();
+      if(typeof element == 'object') {
+        let newDate = element.value
+        this.settings.request.endDate = newDate;
+
+      } else {
+          this.endDateBlock.value = element;
+          this.settings.request.endDate = element;
+      }
+      
+      
   }
   getMaxMinElements(data, field) {
       let maxElement = 0;
@@ -82,13 +146,12 @@ export default class Chart {
       return [minElement, maxElement];
   }
   requestURL(settings){
-      return ['http://www.nbrb.by/API/ExRates/Rates/Dynamics/' + settings.currId + '?startDate=' + settings.startDate + '&endDate=' + settings.endDate , settings]
+      return ['https://pdpcurrencyrates.herokuapp.com/api/currency/' + settings.currId + '/' + settings.startDate + '/' + settings.endDate , settings]
   }
+ 
   getData([url, settings]){
-      this.checkDates(settings.startDate, settings.endDate);
-      if(this.isDateChecked){
 
-          let promise = new Promise((resolve, reject) => {
+            let promise = new Promise((resolve, reject) => {
                 console.log('loading data...');
                 this.showMessage('loading data...');
                 fetch(url)
@@ -107,18 +170,20 @@ export default class Chart {
                 .then(
                     result => {
                         console.log('data loaded');
+                        // console.log(result);
                         this.data = result;
                         this.isDataLoaded = true;
+                        this.currIdBlcok.removeAttribute('disabled');
+                        this.startDateBlock.removeAttribute('disabled');
+                        this.endDateBlock.removeAttribute('disabled');
                         this.clearMessage();
                         this.clearCanvas();
                         this.convertData();
+
                     },
                     error => {
                         console.log(error);
-                    }
-          );
-      }
-      
+                });
   }
 
   showMessage(text) {
@@ -128,7 +193,6 @@ export default class Chart {
   clearMessage(){
       this.alertBlock.innerHTML = '';
   }
-
   checkDates(dateFrom, dateTo) { //to do : dimension
       dateFrom = Date.parse(dateFrom);
       dateTo = Date.parse(dateTo);
@@ -138,13 +202,11 @@ export default class Chart {
       if(between > this.period || between < 0){
         this.showMessage(this.dateErrorMessage);
         this.isDateChecked = false;
-
         return;
       }
       this.clearMessage()
       this.isDateChecked = true;
   }
-
   clearCanvas() {
       console.log('cleaning...');
       this.canvas.selectAll('*').remove();
@@ -152,7 +214,7 @@ export default class Chart {
 
   buildCanvas(settings){
       if(!document.getElementById('myCanvas')) {
-          this.canvas = d3.select('body')
+          this.canvas = d3.select('.wrapper')
                       .append('svg')
                       .attr('width', settings.width + settings.axis + 150)
                       .attr('height', settings.height + settings.axis)

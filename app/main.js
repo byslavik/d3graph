@@ -12,7 +12,7 @@ const SETTINGS = {
         width: 700,
         height: 500,
         gridQ: 40,
-        axis: 30
+        axis: 45
     }
 };
 
@@ -22,13 +22,13 @@ let typeSelector = document.getElementById('type');
 function changeView(ev) {
     switch (ev.target.value) {
         case 'bar':
-            let bar = new Bar(SETTINGS);
+            new Bar(SETTINGS);
             break;
         case 'ampl':
-            let ampl = new Amplitude(SETTINGS);
+            new Amplitude(SETTINGS);
             break;
         case 'dia':
-            let dia = new Diagram(SETTINGS);
+            new Diagram(SETTINGS);
             break;
     }
 }

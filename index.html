@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title></title>
+        <title>CURRENCY RATES CHART</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="css/style.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
     </head>
     <body>
+        <div class="wrapper">
+            <h1>CURRENCY RATES CHART</h1>
     <p>
-        <select id="currId">
+        <select id="currId" disabled>
             <option value="190">RUB</option>
             <option value="19">EUR</option>
             <option value="145">USD</option>
         </select> / BYR
          | <b>Period:</b>
-        <input type="date" id="dateStart" value="2015-05-01"> -
-        <input type="date" id="dateEnd" value="2016-05-01">
+        <input type="date" id="dateStart" value="2015-04-01" disabled> -
+        <input type="date" id="dateEnd" value="2016-04-01" disabled>
+        <input type="button" id="updateDates" value="Update dates">
 
         |
 
@@ -31,11 +35,15 @@
     </p>
     <p id="alertBlock"></p>
         
-    <p id="description">This application can provide you some charts to describe behavior of national currency.<br>
-                            If you want to see how currency has changed during the year, please select the <b>"Diagram"</b> option.<br>
-                            If you are intrested in stat of currency during one month - select <b>"Bar Chart"</b> option.<br>
-                            Select <b>"Amplitude"</b> option and then you will see amplitude of currency rates by month during one year.</p>
+    <p id="description">
+        Please select <b>type of chart</b> and then proceed with <b>dates</b> <br>
+        We have data for <b>2003 - 2016</b> years <br>
+        This application can provide you some charts to describe behavior of national currency.<br>
+        If you want to see how currency changed between some dates, please select the <b>"Diagram"</b> or <b>"Bar Chart"</b><br>
+        Select <b>"Amplitude"</b> option and then you will see amplitude of currency rates by months.</p>
     
+            
+    </div>
     <script src="https://d3js.org/d3.v4.min.js"></script>
 
     </body>

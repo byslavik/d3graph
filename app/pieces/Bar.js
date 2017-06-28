@@ -5,24 +5,29 @@ export default class Bar extends Chart {
     super(settings);
     this.period = 1000*60*60*24*31;
     this.dateErrorMessage = "You can select dates only for one month";
-    this.setStartDate('2016-04-01');
     this.getData(this.requestURL(this.settings.request));
     
   }
   convertData() {
     let modifiedData = [];
-    this.domainScale(this.getMaxMinElements(this.data, 'Cur_OfficialRate'), this.data);
+    let maxAndMinArr = this.getMaxMinElements(this.data, 'Cur_OfficialRate');
+
+    this.domainScale([maxAndMinArr[0]*0.999, maxAndMinArr[1]], this.data);
 
     let scales = this.scales;
 
     this.data.map((item, i)=> {
       let date = new Date(item.Date);
-        modifiedData.push({
-            y: scales.y(item.Cur_OfficialRate),
-            x: scales.x(date),
-            date: item.Date.split('T')[0],
-            value: item.Cur_OfficialRate
-        });
+       let dateFormated = this.formatDotDate(date);
+        let itemRate = item.Cur_OfficialRate;
+        let itemDen = item.denominatedRate;
+        let rate = this.isDenominated ? itemDen : itemRate;
+          modifiedData.push({
+              y: scales.y(rate),
+              x: scales.x(date),
+              date: dateFormated,
+              origValue: this.isDenominated ? rate.toFixed(3) : rate
+          });
     })
 
     if(modifiedData.length != 0){
@@ -31,7 +36,7 @@ export default class Bar extends Chart {
         this.isDataLoaded = true;
         this.draw(modifiedData);
     } else {
-        this.showMessage('Something wrong. Please, verify your settings ant try again');
+        this.showMessage('Something wrong with server data.');
     }
 
   }
@@ -44,20 +49,22 @@ export default class Bar extends Chart {
   }
 
   draw(data) {
+    this.clearCanvas()
     let settings = this.settings.canvas;
     let canvas = this.canvas;
     this.buildAxis();
-
-    let barWidth = settings.width / data.length;
-    canvas
+    let group = canvas.append('g');
+    let barWidth = ((settings.width / data.length) - 1) < 1 ? 1 : (settings.width / data.length) - 1;
+    console.log(barWidth);
+    group
             .selectAll('rect')
             .data(data)
             .enter()
             .append('rect')
-            .attr('width', barWidth-1)
+            .attr('width', barWidth)
             .attr('fill', '#f90')
-            .attr('x', function(d,i){return (barWidth)*i + settings.axis;})
-            .attr('y', function(d){ return settings.height - d.y;} )
+            .attr('x', function(d,i){return (barWidth+1)*i + settings.axis;})
+            .attr('y', function(d){ return d.y} )
             .on('mousemove', function(d, ev){
               let x =  d3.mouse(this)[0]++ ;
               let y = d3.mouse(this)[1]++;
@@ -65,7 +72,7 @@ export default class Bar extends Chart {
               let offsetY = y - 67 ;
               let infoPopup = canvas.select('#infoPopup');
                 infoPopup.select('.infoPopupDate text').text('Date: ' + d.date);
-                infoPopup.select('.infoPopupRate text').text('Rate: ' + d.value + ' Bel. Rub.');
+                infoPopup.select('.infoPopupRate text').text('Rate: ' + d.origValue + ' Bel. Rub.');
 
                 infoPopup
                       .attr('style', 'display: block; transform: translateX('+ offsetX +'px) translateY('+ offsetY +'px)');  
@@ -76,7 +83,7 @@ export default class Bar extends Chart {
             .transition()
             .duration(1000)
             
-            .attr('height', function(d){return d.y})
+            .attr('height', function(d){return settings.height - d.y})
       
       this.drawInfoBox();
   }

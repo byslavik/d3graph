@@ -6,18 +6,14 @@ export default class Diagram extends Chart {
 
     let that = this;
     this.period = 1000*60*60*24*366;
-    this.dateErrorMessage = "You can select dates only for one year";
-    
-    this.setStartDate('2015-05-01');
-    this.checkDates(settings.request.startDate, settings.request.endDate);
 
-    if(this.isDateChecked) {
-      this.getData(this.requestURL(this.settings.request));
+    this.getData(this.requestURL(this.settings.request));
 
-      this.canvas.on("mousemove", function() {that.canvasHandler(d3.mouse(this)) } );
-    }
+    this.canvas.on("mousemove", function() {that.canvasHandler(d3.mouse(this)) } );
+
   }
   draw(data) {
+      this.clearCanvas();
       console.log('draw...');
 
       let group = this.canvas.append('g');
@@ -35,7 +31,7 @@ export default class Diagram extends Chart {
               .attr('fill', 'none')
               .attr('stroke', 'blue')
               .attr('stroke-width', 2 )
-              .attr('style', "transform: translateX(30px)" )
+              .attr('style', "transform: translateX("+ this.settings.canvas.axis +"px)" )
 
       console.log('done');
       this.buildAxis();
@@ -50,7 +46,7 @@ export default class Diagram extends Chart {
     this.canvas.append('g').attr('style', 'transform: translate(' + settings.axis + 'px, ' + settings.height  + 'px)').call(d3.axisBottom(scales.x));
   }
 
-  formatDate(date) {
+  formatDotDate(date) {
       var dd = date.getDate();
       if (dd < 10) dd = '0' + dd;
 
@@ -63,7 +59,8 @@ export default class Diagram extends Chart {
   }
   convertData(){
       this.clearMessage();
-      this.domainScale(this.getMaxMinElements(this.data, 'Cur_OfficialRate'), this.data);
+      let sortField = this.isDenominated ? 'denominatedRate' : 'Cur_OfficialRate';
+      this.domainScale(this.getMaxMinElements(this.data, sortField), this.data);
 
       let scales = this.scales;
 
@@ -71,12 +68,17 @@ export default class Diagram extends Chart {
       let modifiedData = [];
 
       this.data.map((item, i)=> {
-        let date = new Date(item.Date)
+        let date = new Date(item.Date);
+        let dateFormated = this.formatDotDate(date);
+        let itemRate = item.Cur_OfficialRate;
+        let itemDen = item.denominatedRate;
+        let rate = this.isDenominated ? itemDen : itemRate;
+        console.log(rate);
           modifiedData.push({
-              y: scales.y(item.Cur_OfficialRate),
+              y: scales.y(rate),
               x: scales.x(date),
-              date: this.formatDate(date),
-              origValue: item.Cur_OfficialRate
+              date: dateFormated,
+              origValue: this.isDenominated ? rate.toFixed(3) : rate
           });
       })
       if(modifiedData.length != 0){
@@ -86,7 +88,7 @@ export default class Diagram extends Chart {
           this.addPointer();
           this.addInfoBlock();
       } else {
-          this.showMessage('Something wrong. Please, verify your settings ant try again');
+        this.showMessage('Something wrong with server data.');
       }
 
   }
@@ -134,12 +136,12 @@ export default class Diagram extends Chart {
                               .attr('stroke-width', 1)
                               .attr('fill', '#fff')
                               .attr('x', canvasSettings.width + canvasSettings.axis)
-                              .attr('y', -30)
+                              .attr('y', -canvasSettings.axis)
 
       infoCurrGroup.append('text')
                           .attr('id', 'infoCurrency')
                           .attr('x', canvasSettings.width + canvasSettings.axis+5)
-                          .attr('y', -30)
+                          .attr('y', -canvasSettings.axis)
 
   }
   canvasHandler(coords){
@@ -151,6 +153,7 @@ export default class Diagram extends Chart {
           let settings = this.settings.canvas;
           // console.log(x);
           let element = this.modifiedData[Math.round(scales.oX(x - settings.axis))];
+
           if(element){
               this.canvas
                   .select('#areaPointer')
@@ -183,12 +186,7 @@ export default class Diagram extends Chart {
                   .attr('y', element.y+17)
                   .text(element.origValue + " BRB")
 
-              this.canvas
-                      .select('#circlePointer')
-                      .transition()
-                      .duration(70)
-                      .attr('cx', x)
-                      .attr('cy', element.y)
+              
           }
       }
 
