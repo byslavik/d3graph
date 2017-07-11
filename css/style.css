@@ -12,6 +12,9 @@ body {
 #alertBlock{
     color: red;
 }
+#messageBlock{
+    color: darkorange;
+}
 #infoCurrency,
 #infoDate {
   font-size: 12px;

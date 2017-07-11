@@ -16,19 +16,22 @@ const SETTINGS = {
     }
 };
 
-
 let typeSelector = document.getElementById('type');
+let app = null;
 
 function changeView(ev) {
     switch (ev.target.value) {
         case 'bar':
-            new Bar(SETTINGS);
+            app = new Bar(SETTINGS);
+            app.build();
             break;
         case 'ampl':
-            new Amplitude(SETTINGS);
+            app = new Amplitude(SETTINGS);
+            app.build();
             break;
         case 'dia':
-            new Diagram(SETTINGS);
+            app = new Diagram(SETTINGS);
+            app.build();
             break;
     }
 }
