@@ -25,6 +25,8 @@ export default class Chart {
                 'click',
                 this.updatesDates.bind(this, this.startDateBlock, this.endDateBlock)
             );
+
+        this.canvas.attr('class', this.constructor.name);
     }
 
     isInteger(num) {
@@ -64,6 +66,9 @@ export default class Chart {
 
     }
     setCurrId(element) {
+        if(this.checkInstanse()) {
+            return; 
+        }
         this.settings.request.currId = element.target.value;
         this.build();
     }
@@ -98,7 +103,13 @@ export default class Chart {
 
         return dd + '.' + mm + '.' + yyyy;
     }
+    checkInstanse() {
+        return this.canvas.attr("class") !== this.constructor.name;
+    }
     updatesDates(from, to) {
+        if(this.checkInstanse()) {
+            return; 
+        }
         this.setStartDate(from);
         this.setEndDate(to);
         this.clearMessage();

@@ -21,15 +21,15 @@ let app = null;
 
 function changeView(ev) {
     switch (ev.target.value) {
-        case 'bar':
+        case 'Bar':
             app = new Bar(SETTINGS);
             app.build();
             break;
-        case 'ampl':
+        case 'Amplitude':
             app = new Amplitude(SETTINGS);
             app.build();
             break;
-        case 'dia':
+        case 'Diagram':
             app = new Diagram(SETTINGS);
             app.build();
             break;
